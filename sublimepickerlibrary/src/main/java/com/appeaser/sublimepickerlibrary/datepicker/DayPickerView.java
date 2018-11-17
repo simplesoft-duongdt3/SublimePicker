@@ -62,6 +62,11 @@ class DayPickerView extends ViewGroup {
     private Calendar mTempCalendar;
 
     private ProxyDaySelectionEventListener mProxyDaySelectionEventListener;
+    private boolean canPickRange;
+    @Nullable
+    private Calendar tempStartDate = null;
+    @Nullable
+    private Calendar tempEndDate = null;
 
     public DayPickerView(Context context) {
         this(context, null);
@@ -198,7 +203,63 @@ class DayPickerView extends ViewGroup {
             @Override
             public void onDaySelected(DayPickerPagerAdapter adapter, Calendar day) {
                 if (mProxyDaySelectionEventListener != null) {
-                    mProxyDaySelectionEventListener.onDaySelected(DayPickerView.this, day);
+                    if (canPickRange) {
+                        if (isHaveStartSelectedDate()) {
+                            if (tempStartDate != null && compareDates(tempStartDate, day) < 0) {
+                                tempEndDate = (Calendar) day.clone();
+                                this.onDateRangeSelectionEnded(createSelectedDate(tempStartDate, tempEndDate));
+                            } else {
+                                tempStartDate = (Calendar) day.clone();
+                                tempEndDate = (Calendar) day.clone();
+                                this.onDateRangeSelectionStarted(createSelectedDate(tempStartDate, tempEndDate));
+                            }
+                        } else {
+                            tempStartDate = (Calendar) day.clone();
+                            tempEndDate = (Calendar) day.clone();
+                            this.onDateRangeSelectionStarted(createSelectedDate(tempStartDate, tempEndDate));
+                        }
+                    } else {
+                        mProxyDaySelectionEventListener.onDaySelected(DayPickerView.this, day);
+                    }
+                }
+            }
+
+            private SelectedDate createSelectedDate(Calendar startDate, Calendar endDate) {
+                return new SelectedDate(startDate, endDate);
+            }
+
+            private boolean isHaveStartSelectedDate() {
+                return tempStartDate != null && tempEndDate != null && compareDates(tempStartDate, tempEndDate) == 0;
+            }
+
+            public int compareDates(Calendar a, Calendar b) {
+                int aYear = a.get(Calendar.YEAR);
+                int bYear = b.get(Calendar.YEAR);
+
+                int aMonth = a.get(Calendar.MONTH);
+                int bMonth = b.get(Calendar.MONTH);
+
+                int aDayOfMonth = a.get(Calendar.DAY_OF_MONTH);
+                int bDayOfMonth = b.get(Calendar.DAY_OF_MONTH);
+
+                if (aYear < bYear) {
+                    return -1;
+                } else if (aYear > bYear) {
+                    return 1;
+                } else {
+                    if (aMonth < bMonth) {
+                        return -1;
+                    } else if (aMonth > bMonth) {
+                        return 1;
+                    } else {
+                        if (aDayOfMonth < bDayOfMonth) {
+                            return -1;
+                        } else if (aDayOfMonth > bDayOfMonth) {
+                            return 1;
+                        } else {
+                            return 0;
+                        }
+                    }
                 }
             }
 
@@ -226,7 +287,9 @@ class DayPickerView extends ViewGroup {
     }
 
     public void setCanPickRange(boolean canPickRange) {
-        mViewPager.setCanPickRange(canPickRange);
+        this.canPickRange = canPickRange;
+        //disable long click select range day
+        mViewPager.setCanPickRange(false);
     }
 
     private void updateButtonVisibility(int position) {
@@ -362,6 +425,13 @@ class DayPickerView extends ViewGroup {
     private void setDate(SelectedDate date, boolean animate, boolean setSelected, boolean goToPosition) {
         if (setSelected) {
             mSelectedDay = date;
+            if (mSelectedDay != null) {
+                tempStartDate = mSelectedDay.getStartDate();
+                tempEndDate = mSelectedDay.getEndDate();
+            } else {
+                tempStartDate = null;
+                tempEndDate = null;
+            }
         }
 
         final int position = getPositionFromDay(
