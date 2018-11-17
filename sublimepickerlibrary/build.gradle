@@ -1,39 +1,14 @@
+apply plugin: 'com.github.dcendents.android-maven'
+
+group='com.github.simplesoft-duongdt3'
+
 buildscript {
     repositories {
         mavenCentral()
     }
-
-    dependencies {
-        classpath 'com.github.dcendents:android-maven-gradle-plugin:2.1'
-    }
 }
 
 apply plugin: 'com.android.library'
-apply plugin: 'com.github.dcendents.android-maven'
-
-ext {
-    bintrayRepo = 'maven'
-    bintrayName = 'sublime-picker'
-
-    publishedGroupId = 'com.appeaser.sublimepickerlibrary'
-    libraryName = 'SublimePicker'
-    artifact = 'sublimepickerlibrary'
-
-    libraryDescription = 'A material-styled android view that provisions picking of a date, time & recurrence option, all from a single user-interface.'
-
-    siteUrl = 'https://github.com/vikramkakkar/SublimePicker'
-    gitUrl = 'https://github.com/vikramkakkar/SublimePicker.git'
-
-    libraryVersion = '2.1.2'
-
-    developerId = 'vikramkakkar'
-    developerName = 'Vikram Kakkar'
-    developerEmail = 'vikram.kakkar.85@gmail.com'
-
-    licenseName = 'The Apache Software License, Version 2.0'
-    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
-    allLicenses = ["Apache-2.0"]
-}
 
 android {
     compileSdkVersion 27
@@ -64,13 +39,4 @@ dependencies {
     implementation 'com.android.support:support-v4:27.1.1'
     implementation 'com.android.support:gridlayout-v7:27.1.1'
     implementation 'com.android.support:support-annotations:27.1.1'
-}
-
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/installv1.gradle'
-apply from: 'https://raw.githubusercontent.com/nuuneoi/JCenter/master/bintrayv1.gradle'
-
-javadoc {
-    options {
-        encoding = 'UTF-8'
-    }
 }
